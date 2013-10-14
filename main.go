@@ -99,7 +99,7 @@ func hello(res http.ResponseWriter, req *http.Request, t *template.Template) {
 		http.Error(res, "We seem to have an error on our end.", http.StatusInternalServerError)
 		return
 	}
-  err = t.Execute(res, map[string]interface{}{"Title":"Hello World"})
+	err = t.Execute(res, map[string]interface{}{"Title": "Hello World"})
 	if err != nil {
 		log.Println("Error: ", err)
 		http.Error(res, "We seem to have an error on our end.", http.StatusInternalServerError)
