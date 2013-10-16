@@ -5,101 +5,66 @@ package main
 
 import (
 	"flag"
-	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
 )
 
+// Important metadata
 var (
-	serverAddr   string
-	staticDir    string
-	rawTemplates map[string]string
-	noTimestamp  bool
+	ServerAddr  = flag.String("addr", ":5050", "Server Address to listen on")
+	StaticDir   = flag.String("static", "static", "Static Assets folder")
+	NoTimestamp = flag.Bool("noTimestamp", false, "When set to true, removes timestamp from log statements")
 )
 
 func init() {
-	var err error
+	if !flag.Parsed() {
+		flag.Parse()
+	}
 
-	// grab important metadata
-	flag.StringVar(&serverAddr, "addr", ":5050", "Server Address to listen on")
-	flag.StringVar(&staticDir, "static", "static", "Static Assets folder")
-	flag.BoolVar(&noTimestamp, "noTimestamp", false, "When set to true, removes timestamp from log statements")
-	flag.Parse()
-
-	if noTimestamp {
+	if *NoTimestamp {
 		log.SetFlags(0)
 	}
 
 	// Static Asset Serving
-	staticServer := http.FileServer(http.Dir(staticDir))
-	logHandle("/js/", staticServer)
-	logHandle("/css/", staticServer)
-	logHandle("/fonts/", staticServer)
-	logHandle("/img/", staticServer)
-	logHandle("/favicon.ico", staticServer)
-
-	// Raw Templates Loaded into memory
-	var raw []byte
-	rawTemplates = make(map[string]string)
-	for _, filename := range []string{"layout.html", "hello.html"} {
-		raw, err = ioutil.ReadFile("templates/" + filename)
-		if err != nil {
-			log.Fatalln("Fatal Error:", err)
-			return
-		}
-		rawTemplates[filename] = string(raw)
-	}
-
-	// Baseline Template
-	// Any use of this template needs to have a "body" template defined
-	baseTemplate, err := template.New("layout").Parse(string(rawTemplates["layout.html"]))
-	if err != nil {
-		log.Fatalln("Fatal Error:", err)
-		return
-	}
+	staticServer := http.FileServer(http.Dir(*StaticDir))
+	Handle("/js/", staticServer)
+	Handle("/css/", staticServer)
+	Handle("/fonts/", staticServer)
+	Handle("/img/", staticServer)
+	Handle("/favicon.ico", staticServer)
 
 	// Actual Web Application Handlers
-	logHandle("/", handleFuncTemplate(baseTemplate, hello))
+	HandleFunc("/", hello)
 }
 
-func logHandle(path string, h http.Handler) {
+// Log and Handle http requests
+func Handle(path string, h http.Handler) {
 	http.HandleFunc(path, func(r http.ResponseWriter, q *http.Request) {
 		log.Println("Serve:", q.URL.String())
 		h.ServeHTTP(r, q)
 	})
 }
 
+func HandleFunc(path string, h http.HandlerFunc) {
+	Handle(path, http.HandlerFunc(h))
+}
+
 func main() {
-	log.Println("listening at " + serverAddr + "...")
-	err := http.ListenAndServe(serverAddr, nil)
+	log.Println("listening at " + *ServerAddr + "...")
+	err := http.ListenAndServe(*ServerAddr, nil)
 	if err != nil {
 		log.Fatal("Fatal Error:", err)
 	}
 }
 
-type templateHandler func(http.ResponseWriter, *http.Request, *template.Template)
-
-func handleFuncTemplate(t *template.Template, handler templateHandler) http.HandlerFunc {
-	return func(res http.ResponseWriter, req *http.Request) {
-		plate, err := t.Clone()
-		if err != nil {
-			log.Println("Error:", err)
-			http.Error(res, "We seem to have an error on our end.", http.StatusInternalServerError)
-			return
-		}
-		handler(res, req, plate)
-	}
-}
-
-func hello(res http.ResponseWriter, req *http.Request, t *template.Template) {
-	_, err := t.New("body").Parse(rawTemplates["hello.html"])
+func hello(res http.ResponseWriter, req *http.Request) {
+	t, err := LoadTemplates("templates/hello/*.html")
 	if err != nil {
 		log.Println("Error: ", err)
 		http.Error(res, "We seem to have an error on our end.", http.StatusInternalServerError)
 		return
 	}
-	err = t.Execute(res, map[string]interface{}{"Title": "Hello World"})
+	err = t.ExecuteTemplate(res, "bootstrap.html", map[string]interface{}{"Title": "Hello World"})
 	if err != nil {
 		log.Println("Error: ", err)
 		http.Error(res, "We seem to have an error on our end.", http.StatusInternalServerError)
