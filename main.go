@@ -7,6 +7,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"time"
 )
 
 // Important metadata
@@ -40,8 +41,10 @@ func init() {
 // Log and Handle http requests
 func Handle(path string, h http.Handler) {
 	http.HandleFunc(path, func(r http.ResponseWriter, q *http.Request) {
-		log.Println("Serve:", q.URL.String())
+		url := q.URL.String()
+		t := time.Now()
 		h.ServeHTTP(r, q)
+		log.Println("Served:", url, "in", time.Since(t).Nanoseconds()/1000, "µs")
 	})
 }
 
