@@ -41,10 +41,9 @@ func init() {
 // Log and Handle http requests
 func Handle(path string, h http.Handler) {
 	http.HandleFunc(path, func(r http.ResponseWriter, q *http.Request) {
-		url := q.URL.String()
 		t := time.Now()
 		h.ServeHTTP(r, q)
-		log.Println("Served:", url, "in", time.Since(t).Nanoseconds()/1000, "µs")
+		log.Printf("\x1b[1;36mServed:\x1b[0m \x1b[34m%6d\x1b[0mµs \x1b[33m%s\x1b[0m", time.Since(t).Nanoseconds()/1000, q.URL.String())
 	})
 }
 
@@ -53,24 +52,24 @@ func HandleFunc(path string, h http.HandlerFunc) {
 }
 
 func main() {
-	log.Println("listening at " + *ServerAddr + "...")
-	err := http.ListenAndServe(*ServerAddr, nil)
-	if err != nil {
-		log.Fatal("Fatal Error:", err)
-	}
+	log.Println("\x1b[32mlistening at \x1b[1;32m" + *ServerAddr + "\x1b[32m...\x1b[0m")
+	log.Fatalln("Fatal Error:", http.ListenAndServe(*ServerAddr, nil))
+}
+
+func Error500(res http.ResponseWriter, req *http.Request, err error) {
+	log.Println("\x1b[1;31mError:\x1b[0m", req.URL.String(), err)
+	http.Error(res, "We seem to have an error on our end.", http.StatusInternalServerError)
 }
 
 func hello(res http.ResponseWriter, req *http.Request) {
 	t, err := LoadTemplates("templates/hello/*.html")
 	if err != nil {
-		log.Println("Error: ", err)
-		http.Error(res, "We seem to have an error on our end.", http.StatusInternalServerError)
+		Error500(res, req, err)
 		return
 	}
 	err = t.ExecuteTemplate(res, "bootstrap.html", map[string]interface{}{"Title": "Hello World"})
 	if err != nil {
-		log.Println("Error: ", err)
-		http.Error(res, "We seem to have an error on our end.", http.StatusInternalServerError)
+		Error500(res, req, err)
 		return
 	}
 }
