@@ -5,6 +5,7 @@ package main
 
 import (
 	"flag"
+	"github.com/russross/blackfriday"
 	"html/template"
 )
 
@@ -26,7 +27,17 @@ func init() {
 // Load base templates and templates from the provided pattern
 // TODO: if performance becomes an issue, we can start caching the base templates, and cloning
 func LoadTemplates(patterns ...string) (*template.Template, error) {
-	b, err := template.ParseGlob(*LayoutTemplateGlob)
+	var err error
+	// add some key helper functions to the templates
+	b := template.New("base").Funcs(template.FuncMap{
+		"markdownCommon": func(raw string) template.HTML {
+			return template.HTML(blackfriday.MarkdownCommon([]byte(raw)))
+		},
+		"markdownBasic": func(raw string) template.HTML {
+			return template.HTML(blackfriday.MarkdownBasic([]byte(raw)))
+		},
+	})
+	b, err = b.ParseGlob(*LayoutTemplateGlob)
 	if err != nil {
 		return nil, err
 	}
