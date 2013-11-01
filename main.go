@@ -7,6 +7,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -27,7 +28,7 @@ func init() {
 	}
 
 	// Static Asset Serving
-	staticServer := http.FileServer(http.Dir(*StaticDir))
+	staticServer := NoIndex(http.FileServer(http.Dir(*StaticDir)))
 	Handle("/js/", staticServer)
 	Handle("/css/", staticServer)
 	Handle("/fonts/", staticServer)
@@ -40,6 +41,12 @@ func init() {
 
 // Log and Handle http requests
 func Handle(path string, h http.Handler) {
+	if strings.HasSuffix(path, "/") { // redirect for directories
+		indexRedirect := http.RedirectHandler(path, http.StatusMovedPermanently)
+		Handle(path+"index.html", indexRedirect)
+		Handle(path+"index.htm", indexRedirect)
+		Handle(path+"index.php", indexRedirect) // not that anybody would think...
+	}
 	http.HandleFunc(path, func(r http.ResponseWriter, q *http.Request) {
 		t := time.Now()
 		h.ServeHTTP(r, q)
@@ -49,6 +56,16 @@ func Handle(path string, h http.Handler) {
 
 func HandleFunc(path string, h http.HandlerFunc) {
 	Handle(path, http.HandlerFunc(h))
+}
+
+func NoIndex(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(r http.ResponseWriter, q *http.Request) {
+		if strings.HasSuffix(q.URL.Path, "/") {
+			Error403(r, q)
+			return
+		}
+		h.ServeHTTP(r, q)
+	})
 }
 
 func main() {
@@ -61,6 +78,16 @@ func Error500(res http.ResponseWriter, req *http.Request, err error) {
 	http.Error(res, "We seem to have an error on our end.", http.StatusInternalServerError)
 }
 
+func Error403(res http.ResponseWriter, req *http.Request) {
+	log.Println("\x1b[1;31mNot Allowed:\x1b[0m", req.URL.String())
+	http.Error(res, "Nothing to see here.", http.StatusForbidden)
+}
+
+func Error404(res http.ResponseWriter, req *http.Request) {
+	log.Println("\x1b[1;31mNot Found:\x1b[0m", req.URL.String())
+	http.Error(res, "We can't seem to find that.", http.StatusNotFound)
+}
+
 type Nav struct {
 	*http.Request
 }
@@ -70,6 +97,10 @@ func (n Nav) IsCurrent(p string) bool {
 }
 
 func hello(res http.ResponseWriter, req *http.Request) {
+	if !strings.HasSuffix(req.URL.Path, "/") { // no sub-paths
+		Error404(res, req)
+		return
+	}
 	t, err := LoadTemplates("templates/hello/*.html")
 	if err != nil {
 		Error500(res, req, err)
