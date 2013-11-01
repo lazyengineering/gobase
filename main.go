@@ -4,6 +4,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"log"
 	"net/http"
@@ -91,11 +92,18 @@ func hello(res http.ResponseWriter, req *http.Request) {
 		Error500(res, req, err)
 		return
 	}
-	err = t.ExecuteTemplate(res, "bootstrap.html", map[string]interface{}{
+	// write to a buffer to eliminate any half-executed templates from being written
+	b := new(bytes.Buffer)
+	err = t.ExecuteTemplate(b, "bootstrap.html", map[string]interface{}{
 		"Title":     "Hello World",
 		"BodyClass": "hello",
 		"Nav":       Nav{req},
 	})
+	if err != nil {
+		Error500(res, req, err)
+		return
+	}
+	_, err = b.WriteTo(res)
 	if err != nil {
 		Error500(res, req, err)
 		return
