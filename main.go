@@ -67,7 +67,10 @@ func hello(res http.ResponseWriter, req *http.Request) {
 		Error500(res, req, err)
 		return
 	}
-	err = t.ExecuteTemplate(res, "bootstrap.html", map[string]interface{}{"Title": "Hello World"})
+	err = t.ExecuteTemplate(res, "bootstrap.html", map[string]interface{}{
+		"Title":     "Hello World",
+		"BodyClass": "hello",
+	})
 	if err != nil {
 		Error500(res, req, err)
 		return
