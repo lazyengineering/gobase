@@ -1,0 +1,21 @@
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="/">Brand</a>
+  </div>
+
+  <div class="collapse navbar-collapse" id="navbar-collapse-1">
+    <ul class="nav navbar-nav">
+      <!-- On-site links -->
+      <li{{if .IsCurrent "/foo/"}} class="active"{{end}}><a href="/foo/">Foo</a></li>
+      <li{{if .IsCurrent "/bar/"}} class="active"{{end}}><a href="/bar/">Bar</a></li>
+      <li class="divider"></li>
+      <!-- Off-site links -->
+    </ul>
+  </div><!-- /.navbar-collapse -->
+</nav>

@@ -61,6 +61,14 @@ func Error500(res http.ResponseWriter, req *http.Request, err error) {
 	http.Error(res, "We seem to have an error on our end.", http.StatusInternalServerError)
 }
 
+type Nav struct {
+	*http.Request
+}
+
+func (n Nav) IsCurrent(p string) bool {
+	return p == n.Request.URL.Path
+}
+
 func hello(res http.ResponseWriter, req *http.Request) {
 	t, err := LoadTemplates("templates/hello/*.html")
 	if err != nil {
@@ -70,6 +78,7 @@ func hello(res http.ResponseWriter, req *http.Request) {
 	err = t.ExecuteTemplate(res, "bootstrap.html", map[string]interface{}{
 		"Title":     "Hello World",
 		"BodyClass": "hello",
+		"Nav":       Nav{req},
 	})
 	if err != nil {
 		Error500(res, req, err)
