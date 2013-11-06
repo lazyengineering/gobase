@@ -8,21 +8,34 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
 
 // Important metadata
 var (
-	ServerAddr  = flag.String("addr", ":5050", "Server Address to listen on")
-	StaticDir   = flag.String("static", "static", "Static Assets folder")
-	NoTimestamp = flag.Bool("noTimestamp", false, "When set to true, removes timestamp from log statements")
+	ServerAddr   = flag.String("server-addr", ":5050", "Server Address to listen on")
+	StaticDir    = flag.String("static-dir", "static", "Static Assets folder")
+	NoTimestamp  = flag.Bool("no-timestamp", false, "When set to true, removes timestamp from log statements")
 )
 
 func init() {
-	if !flag.Parsed() {
-		flag.Parse()
-	}
+	// set from environment where available before parsing (allows flags to overrule env)
+	flag.VisitAll(func(f *flag.Flag) {
+		switch f.Name {
+		case "server-addr": // special case because it doesn't map directly
+			if port := os.Getenv("PORT"); len(port) > 0 {
+				f.Value.Set(":" + port)
+			}
+		default:
+			if v := os.Getenv(strings.ToUpper(strings.Replace(f.Name, "-", "_", -1))); len(v) > 0 {
+				f.Value.Set(v)
+			}
+		}
+	})
+
+	flag.Parse()
 
 	if *NoTimestamp {
 		log.SetFlags(0)

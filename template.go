@@ -14,16 +14,6 @@ var (
 	HelperTemplateGlob = flag.String("helpers", "templates/helpers/*.html", "Pattern for helper templates")
 )
 
-/*
-func init() {
-	var err error
-
-	if !flag.Parsed() {
-		flag.Parse()
-	}
-}
-*/
-
 // Load base templates and templates from the provided pattern
 // TODO: if performance becomes an issue, we can start caching the base templates, and cloning
 func LoadTemplates(patterns ...string) (*template.Template, error) {
