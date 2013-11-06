@@ -112,7 +112,7 @@ func hello(res http.ResponseWriter, req *http.Request) {
 		"Title":     "Hello World",
 		"BodyClass": "hello",
 		"Nav":       Nav{req},
-		"GATrackingID": GATrackingID,
+		"GATrackingID": *GATrackingID,
 	})
 	if err != nil {
 		Error500(res, req, err)
