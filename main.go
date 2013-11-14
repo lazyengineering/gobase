@@ -16,12 +16,15 @@ import (
 // Important metadata
 var (
 	ServerAddr   = flag.String("server-addr", ":5050", "Server Address to listen on")
-	StaticDir    = flag.String("static-dir", "static", "Static Assets folder")
-	NoTimestamp  = flag.Bool("no-timestamp", false, "When set to true, removes timestamp from log statements")
 	GATrackingID = flag.String("ga-tracking-id", "", "Google Analytics Tracking ID")
 )
 
 func init() {
+	var (
+		StaticDir   = flag.String("static-dir", "static", "Static Assets folder")
+		NoTimestamp = flag.Bool("no-timestamp", false, "When set to true, removes timestamp from log statements")
+	)
+
 	// set from environment where available before parsing (allows flags to overrule env)
 	flag.VisitAll(func(f *flag.Flag) {
 		switch f.Name {
@@ -119,9 +122,9 @@ func hello(res http.ResponseWriter, req *http.Request) {
 	// write to a buffer to eliminate any half-executed templates from being written
 	b := new(bytes.Buffer)
 	err = t.ExecuteTemplate(b, "bootstrap.html", map[string]interface{}{
-		"Title":     "Hello World",
-		"BodyClass": "hello",
-		"Nav":       Nav{req},
+		"Title":        "Hello World",
+		"BodyClass":    "hello",
+		"Nav":          Nav{req},
 		"GATrackingID": *GATrackingID,
 	})
 	if err != nil {
