@@ -51,7 +51,7 @@ func init() {
 	Handle("/favicon.ico", staticServer)
 
 	// Actual Web Application Handlers
-	HandleNoSubPaths("/", hello)
+	HandleNoSubPaths("/", http.HandlerFunc(hello))
 }
 
 // Log and Handle http requests
