@@ -18,6 +18,7 @@ var (
 	ServerAddr   = flag.String("server-addr", ":5050", "Server Address to listen on")
 	StaticDir    = flag.String("static-dir", "static", "Static Assets folder")
 	NoTimestamp  = flag.Bool("no-timestamp", false, "When set to true, removes timestamp from log statements")
+	GATrackingID = flag.String("ga-tracking-id", "", "Google Analytics Tracking ID")
 )
 
 func init() {
@@ -111,6 +112,7 @@ func hello(res http.ResponseWriter, req *http.Request) {
 		"Title":     "Hello World",
 		"BodyClass": "hello",
 		"Nav":       Nav{req},
+		"GATrackingID": GATrackingID,
 	})
 	if err != nil {
 		Error500(res, req, err)

@@ -18,6 +18,23 @@
         <link rel="stylesheet" href="/css/main.css">
 
         <script src="/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+        {{if .GATrackingID}}
+        <script type="text/javascript">
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', '{{.GATrackingID}}']);
+          _gaq.push(['_setDomainName', 'runboyrunband.com']);
+          _gaq.push(['_trackPageview']);
+
+          (function() {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+          })();
+        </script>
+        {{end}}
     </head>
     <body{{if .BodyClass}} class="{{.BodyClass}}"{{end}}>
         <!--[if lt IE 7]>
@@ -39,12 +56,19 @@
         <script src="/js/bootstrap.min.js"></script>
 
         <script src="/js/main.js"></script>
-
-        <script>
-            var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
-            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-            g.src='//www.google-analytics.com/ga.js';
-            s.parentNode.insertBefore(g,s)}(document,'script'));
+        {{if .GATrackingID}}
+        <script type="text/javascript">
+          if (window.location.host !== 'localhost') {
+            var a = document.getElementsByTagName('a');
+            for(i = 0; i < a.length; i++){
+              if (a[i].href.indexOf(location.host) == -1 && a[i].href.match(/^http:\/\//i)){
+                a[i].onclick = function(){
+                  _gaq.push(['_trackEvent', 'outgoing_links', this.href.replace(/^http:\/\//i, '')]);
+                }
+              }
+            }
+          }
         </script>
+        {{end}}
     </body>
 </html>
