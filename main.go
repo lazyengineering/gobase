@@ -51,7 +51,7 @@ func init() {
 	Handle("/favicon.ico", staticServer)
 
 	// Actual Web Application Handlers
-	HandleFunc("/", hello)
+	HandleNoSubPaths("/", hello)
 }
 
 // Log and Handle http requests
@@ -73,10 +73,24 @@ func HandleFunc(path string, h http.HandlerFunc) {
 	Handle(path, http.HandlerFunc(h))
 }
 
+func HandleNoSubPaths(path string, h http.Handler) {
+	Handle(path, NoSubPaths(path, h))
+}
+
 func NoIndex(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(r http.ResponseWriter, q *http.Request) {
 		if strings.HasSuffix(q.URL.Path, "/") {
 			Error403(r, q)
+			return
+		}
+		h.ServeHTTP(r, q)
+	})
+}
+
+func NoSubPaths(path string, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(r http.ResponseWriter, q *http.Request) {
+		if q.URL.Path != path {
+			Error404(r, q)
 			return
 		}
 		h.ServeHTTP(r, q)
@@ -97,10 +111,6 @@ func (n Nav) IsCurrent(p string) bool {
 }
 
 func hello(res http.ResponseWriter, req *http.Request) {
-	if !strings.HasSuffix(req.URL.Path, "/") { // no sub-paths
-		Error404(res, req)
-		return
-	}
 	t, err := LoadTemplates("templates/hello/*.html")
 	if err != nil {
 		Error500(res, req, err)
