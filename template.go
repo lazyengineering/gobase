@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	LayoutTemplateGlob = flag.String("layouts", "templates/layouts/*.html", "Pattern for layout templates")
-	HelperTemplateGlob = flag.String("helpers", "templates/helpers/*.html", "Pattern for helper templates")
+	LayoutTemplateGlob = flag.String("layouts", "static/templates/layouts/*.html", "Pattern for layout templates")
+	HelperTemplateGlob = flag.String("helpers", "static/templates/helpers/*.html", "Pattern for helper templates")
 )
 
 // Load base templates and templates from the provided pattern

@@ -111,7 +111,7 @@ func (n Nav) IsCurrent(p string) bool {
 }
 
 func hello(res http.ResponseWriter, req *http.Request) {
-	t, err := LoadTemplates("templates/hello/*.html")
+	t, err := LoadTemplates("static/templates/hello/*.html")
 	if err != nil {
 		Error500(res, req, err)
 		return
