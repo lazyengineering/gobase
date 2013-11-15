@@ -4,7 +4,6 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"log"
 	"net/http"
@@ -12,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lazyengineering/gobase/templates"
+	"github.com/lazyengineering/gobase/layouts"
 )
 
 // Important metadata
@@ -21,7 +20,7 @@ var (
 	GATrackingID = flag.String("ga-tracking-id", "", "Google Analytics Tracking ID")
 )
 
-var Templates templates.Collection
+var Layout *layouts.Layout
 
 func init() {
 	var (
@@ -59,15 +58,11 @@ func init() {
 	Handle("/img/", staticServer)
 	Handle("/favicon.ico", staticServer)
 
-	// Templates
-	Templates = templates.Collection{
-		LayoutGlob: *LayoutTemplateGlob,
-		HelperGlob: *HelperTemplateGlob,
-		Functions:  templates.BasicFunctionMap(),
-	}
+	// Layouts
+	Layout = layouts.New(layouts.BasicFunctionMap(), "bootstrap.html", *LayoutTemplateGlob, *HelperTemplateGlob)
 
 	// Actual Web Application Handlers
-	HandleNoSubPaths("/", http.HandlerFunc(hello))
+	HandleNoSubPaths("/", Layout.Act(hello, Error500, "static/templates/hello/*.html"))
 }
 
 // Log and Handle http requests
@@ -126,27 +121,11 @@ func (n Nav) IsCurrent(p string) bool {
 	return p == n.Request.URL.Path
 }
 
-func hello(res http.ResponseWriter, req *http.Request) {
-	t, err := Templates.Load("static/templates/hello/*.html")
-	if err != nil {
-		Error500(res, req, err)
-		return
-	}
-	// write to a buffer to eliminate any half-executed templates from being written
-	b := new(bytes.Buffer)
-	err = t.ExecuteTemplate(b, "bootstrap.html", map[string]interface{}{
+func hello(req *http.Request) (map[string]interface{}, error) {
+	return map[string]interface{}{
 		"Title":        "Hello World",
 		"BodyClass":    "hello",
 		"Nav":          Nav{req},
 		"GATrackingID": *GATrackingID,
-	})
-	if err != nil {
-		Error500(res, req, err)
-		return
-	}
-	_, err = b.WriteTo(res)
-	if err != nil {
-		Error500(res, req, err)
-		return
-	}
+	}, nil
 }
