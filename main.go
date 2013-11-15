@@ -11,6 +11,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/lazyengineering/gobase/templates"
 )
 
 // Important metadata
@@ -19,7 +21,7 @@ var (
 	GATrackingID = flag.String("ga-tracking-id", "", "Google Analytics Tracking ID")
 )
 
-var Templates TemplateSet
+var Templates templates.Collection
 
 func init() {
 	var (
@@ -58,10 +60,10 @@ func init() {
 	Handle("/favicon.ico", staticServer)
 
 	// Templates
-	Templates = TemplateSet{
+	Templates = templates.Collection{
 		LayoutGlob: *LayoutTemplateGlob,
 		HelperGlob: *HelperTemplateGlob,
-		Functions:  BasicFunctionMap(),
+		Functions:  templates.BasicFunctionMap(),
 	}
 
 	// Actual Web Application Handlers

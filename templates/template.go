@@ -1,20 +1,20 @@
 // Copyright 2013 Jesse Allen. All rights reserved
 // Released under the MIT license found in the LICENSE file.
 
-package main
+package templates
 
 import (
 	"github.com/russross/blackfriday"
 	"html/template"
 )
 
-type TemplateSet struct {
+type Collection struct {
 	LayoutGlob, HelperGlob string
 	Functions              template.FuncMap
 }
 
 // TODO: if performance becomes an issue, we can start caching the base templates, and cloning
-func (s *TemplateSet) Load(patterns ...string) (*template.Template, error) {
+func (s *Collection) Load(patterns ...string) (*template.Template, error) {
 	var err error
 	// add some key helper functions to the templates
 	b := template.New("base").Funcs(s.Functions)
