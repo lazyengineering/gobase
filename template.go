@@ -4,38 +4,40 @@
 package main
 
 import (
-	"flag"
 	"github.com/russross/blackfriday"
 	"html/template"
 )
 
-var (
-	LayoutTemplateGlob = flag.String("layouts", "static/templates/layouts/*.html", "Pattern for layout templates")
-	HelperTemplateGlob = flag.String("helpers", "static/templates/helpers/*.html", "Pattern for helper templates")
-)
+type TemplateSet struct {
+	LayoutGlob, HelperGlob string
+	Functions              template.FuncMap
+}
 
-// Load base templates and templates from the provided pattern
 // TODO: if performance becomes an issue, we can start caching the base templates, and cloning
-func LoadTemplates(patterns ...string) (*template.Template, error) {
+func (s *TemplateSet) Load(patterns ...string) (*template.Template, error) {
 	var err error
 	// add some key helper functions to the templates
-	b := template.New("base").Funcs(template.FuncMap{
-		"markdownCommon": func(raw string) template.HTML {
-			return template.HTML(blackfriday.MarkdownCommon([]byte(raw)))
-		},
-		"markdownBasic": func(raw string) template.HTML {
-			return template.HTML(blackfriday.MarkdownBasic([]byte(raw)))
-		},
-	})
-	b, err = b.ParseGlob(*LayoutTemplateGlob)
+	b := template.New("base").Funcs(s.Functions)
+	b, err = b.ParseGlob(s.LayoutGlob)
 	if err != nil {
 		return nil, err
 	}
-	for _, p := range append([]string{*HelperTemplateGlob}, patterns...) {
+	for _, p := range append([]string{s.HelperGlob}, patterns...) {
 		_, err = b.ParseGlob(p)
 		if err != nil {
 			return nil, err
 		}
 	}
 	return b, nil
+}
+
+func BasicFunctionMap() template.FuncMap {
+	return template.FuncMap{
+		"markdownCommon": func(raw string) template.HTML {
+			return template.HTML(blackfriday.MarkdownCommon([]byte(raw)))
+		},
+		"markdownBasic": func(raw string) template.HTML {
+			return template.HTML(blackfriday.MarkdownBasic([]byte(raw)))
+		},
+	}
 }

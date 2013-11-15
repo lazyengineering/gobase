@@ -19,10 +19,14 @@ var (
 	GATrackingID = flag.String("ga-tracking-id", "", "Google Analytics Tracking ID")
 )
 
+var Templates TemplateSet
+
 func init() {
 	var (
-		StaticDir   = flag.String("static-dir", "static", "Static Assets folder")
-		NoTimestamp = flag.Bool("no-timestamp", false, "When set to true, removes timestamp from log statements")
+		NoTimestamp        = flag.Bool("no-timestamp", false, "When set to true, removes timestamp from log statements")
+		StaticDir          = flag.String("static-dir", "static", "Static Assets folder")
+		LayoutTemplateGlob = flag.String("layouts", "static/templates/layouts/*.html", "Pattern for layout templates")
+		HelperTemplateGlob = flag.String("helpers", "static/templates/helpers/*.html", "Pattern for helper templates")
 	)
 
 	// set from environment where available before parsing (allows flags to overrule env)
@@ -52,6 +56,13 @@ func init() {
 	Handle("/fonts/", staticServer)
 	Handle("/img/", staticServer)
 	Handle("/favicon.ico", staticServer)
+
+	// Templates
+	Templates = TemplateSet{
+		LayoutGlob: *LayoutTemplateGlob,
+		HelperGlob: *HelperTemplateGlob,
+		Functions:  BasicFunctionMap(),
+	}
 
 	// Actual Web Application Handlers
 	HandleNoSubPaths("/", http.HandlerFunc(hello))
@@ -114,7 +125,7 @@ func (n Nav) IsCurrent(p string) bool {
 }
 
 func hello(res http.ResponseWriter, req *http.Request) {
-	t, err := LoadTemplates("static/templates/hello/*.html")
+	t, err := Templates.Load("static/templates/hello/*.html")
 	if err != nil {
 		Error500(res, req, err)
 		return
