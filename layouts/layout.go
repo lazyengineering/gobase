@@ -8,6 +8,8 @@ import (
 	"github.com/russross/blackfriday"
 	"html/template"
 	"net/http"
+	"sync"
+	"time"
 )
 
 type Layout struct {
@@ -29,6 +31,32 @@ func (l *Layout) Init(functions template.FuncMap, baseTemplate string, patterns 
 }
 
 type Action func(*http.Request) (map[string]interface{}, error)
+
+func (a Action) Cache(ttl time.Duration) Action {
+	var data map[string]interface{}
+	lock := sync.RWMutex{}
+	return func(r *http.Request) (map[string]interface{}, error) {
+		lock.RLock()
+		if data != nil {
+			lock.RUnlock()
+			return data, nil
+		}
+		lock.RUnlock()
+
+		lock.Lock()
+		defer lock.Unlock()
+		var err error
+		data, err = a(r)
+		if data != nil {
+			time.AfterFunc(ttl, func() {
+				lock.Lock()
+				data = nil
+				lock.Unlock()
+			})
+		}
+		return data, err
+	}
+}
 
 type ErrorHandler func(http.ResponseWriter, *http.Request, error)
 
