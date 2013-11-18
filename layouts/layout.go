@@ -61,8 +61,10 @@ func (a Action) Cache(ttl time.Duration) Action {
 type ErrorHandler func(http.ResponseWriter, *http.Request, error)
 
 func (l *Layout) Act(respond Action, eh ErrorHandler, templates ...string) http.Handler {
+	// Load templates so that we can clone instead of loading every time
+	permanentTemplates := template.Must(l.load(templates...))
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		t, err := l.load(templates...)
+		t, err := permanentTemplates.Clone()
 		if err != nil {
 			eh(res, req, err)
 			return
