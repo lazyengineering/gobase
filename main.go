@@ -51,7 +51,14 @@ func init() {
 	}
 
 	// Static Asset Serving
-	staticServer := NoIndex(http.FileServer(http.Dir(*StaticDir)))
+	staticServer := NoIndex(func(h http.Handler) http.Handler {
+		// add 1 day caching headers to static assets
+		return http.HandlerFunc(func(r http.ResponseWriter, q *http.Request) {
+			r.Header().Set("Cache-Control", "public, max-age=86400")
+			r.Header().Set("Expires", time.Now().Add(24*time.Hour).Format(time.RFC1123))
+			h.ServeHTTP(r, q)
+		})
+	}(http.FileServer(http.Dir(*StaticDir))))
 	Handle("/js/", staticServer)
 	Handle("/css/", staticServer)
 	Handle("/fonts/", staticServer)
