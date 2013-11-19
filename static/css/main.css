@@ -6,6 +6,11 @@ body {
   padding-top: 70px;
 }
 
+.error-message {
+  padding: 40px 15px;
+  text-align: center;
+}
+
 
 
 

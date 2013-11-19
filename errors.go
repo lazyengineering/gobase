@@ -8,14 +8,40 @@ import (
 	"net/http"
 )
 
-const page500 = `<html>
-<head><title>Oops! Something went wrong!</title></head>
+const page500 = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>500 – It Broke.</title>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <!-- Custom styles for this template -->
+  <link href="/css/main.css" rel="stylesheet">
+  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+  <![endif]-->
+</head>
 <body>
-<h1>Oops! Something went wrong!</h1>
-<p>Don't worry, we'll be looking into the problem, and have everything back to you in tip-top shape soon enough</p>
+  <div class="container">
+    <div class="error-message">
+      <h1>500</h1>
+      <p class="lead">It broke. We'll have to fix it.</p>
+    </div>
+  </div><!-- /.container -->
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
 </body>
-</html>
-`
+</html>`
 
 func Error500(res http.ResponseWriter, req *http.Request, err error) {
 	log.Println("\x1b[1;31mError:\x1b[0m", req.URL.String(), err)
@@ -24,10 +50,38 @@ func Error500(res http.ResponseWriter, req *http.Request, err error) {
 	res.Write([]byte(page500))
 }
 
-const page404 = `<html>
-<head><title>Oops! We can't seem to find that!</title></head>
+const page404 = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>404 – Not Found</title>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <!-- Custom styles for this template -->
+  <link href="/css/main.css" rel="stylesheet">
+  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+  <![endif]-->
+</head>
 <body>
-<h1>We can't seem to locate the resource you are looking for.</h1>
+  <div class="container">
+    <div class="error-message">
+      <h1>404</h1>
+      <p class="lead">You won't find what you're looking for here.</p>
+    </div>
+  </div><!-- /.container -->
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
 </body>
 </html>`
 
@@ -38,10 +92,38 @@ func Error404(res http.ResponseWriter, req *http.Request) {
 	res.Write([]byte(page404))
 }
 
-const page403 = `<html>
-<head><title>No! You can't be here!</title></head>
+const page403 = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>403 – Forbidden</title>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+  <!-- Custom styles for this template -->
+  <link href="/css/main.css" rel="stylesheet">
+  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+  <![endif]-->
+</head>
 <body>
-<h1>You have stumbled upon a locked door, turn around and go the other way.</h1>
+  <div class="container">
+    <div class="error-message">
+      <h1>403</h1>
+      <p class="lead">Ah, ah, ah, you didn't say the magic word…</p>
+    </div>
+  </div><!-- /.container -->
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
 </body>
 </html>`
 
