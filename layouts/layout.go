@@ -189,7 +189,7 @@ func (l *Layout) load(patterns ...string) (*template.Template, error) {
 			return nil, err
 		}
 	}
-	log.Printf("\x1b[1;35mTemplates:\x1b[0m \x1b[34m%5d\x1b[0mµs \x1b[33m%v\x1b[0m", time.Since(t).Nanoseconds()/1000, append(l.patterns, patterns...))
+	log.Printf("\x1b[1;35mTemplates:\x1b[0m \x1b[34m%6d\x1b[0mµs \x1b[33m%v\x1b[0m", time.Since(t).Nanoseconds()/1000, append(l.patterns, patterns...))
 	return b, nil
 }
 
