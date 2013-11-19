@@ -8,8 +8,17 @@ import (
 	"github.com/russross/blackfriday"
 	"html/template"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
+)
+
+const (
+	NoVolatility      = iota // A request is not expected to have a different result for the lifetime of the application
+	LowVolatility            // A request should have a different result within one day of changes to source data
+	MediumVolatility         // A request should have a different result within an hour of changes to source data
+	HighVolatility           // A request should have a different result with five minutes of changes to source data
+	ExtremeVolatility        // A request should immediately reflect changes to source data
 )
 
 // Layout defines a collection of templates we can use throughout a site,
@@ -42,6 +51,7 @@ type Action func(*http.Request) (map[string]interface{}, error)
 
 // Returns an Action that runs the original Action when there is no cached value.
 // The cached value is unset after the given ttl (time to live) duration.
+// A negative ttl will permanently cache
 func (a Action) Cache(ttl time.Duration) Action {
 	var data map[string]interface{}
 	lock := sync.RWMutex{}
@@ -58,11 +68,13 @@ func (a Action) Cache(ttl time.Duration) Action {
 		var err error
 		data, err = a(r)
 		if data != nil {
-			time.AfterFunc(ttl, func() {
-				lock.Lock()
-				data = nil
-				lock.Unlock()
-			})
+			if ttl > 0 {
+				time.AfterFunc(ttl, func() {
+					lock.Lock()
+					data = nil
+					lock.Unlock()
+				})
+			}
 		}
 		return data, err
 	}
@@ -73,11 +85,71 @@ type ErrorHandler func(http.ResponseWriter, *http.Request, error)
 
 // Use Act in order to create an http.Handler that fills a template with the data from an executed Action
 // or executes the ErrorHandler in case of an error.
-func (l *Layout) Act(respond Action, eh ErrorHandler, templates ...string) http.Handler {
-	// Load templates so that we can clone instead of loading every time
-	permanentTemplates := template.Must(l.load(templates...))
+func (l *Layout) Act(respond Action, eh ErrorHandler, volatility int, templates ...string) http.Handler {
+	var loadTemplates func() (*template.Template, error)
+	var ttl time.Duration
+	switch volatility {
+	case NoVolatility:
+		// Load templates so that we can clone instead of loading every time
+		var storedTemplates *template.Template
+		lock := sync.Mutex{}
+		loadTemplates = func() (*template.Template, error) {
+			var err error
+			lock.Lock()
+			defer lock.Unlock()
+			if storedTemplates == nil {
+				storedTemplates, err = l.load(templates...)
+				if err != nil {
+					return nil, err
+				}
+			}
+			return storedTemplates.Clone()
+		}
+		respond = respond.Cache(-1) // cache permanently
+		ttl = 7 * 24 * time.Hour
+	case LowVolatility:
+		ttl = 24 * time.Hour
+		fallthrough
+	case MediumVolatility:
+		if ttl == 0 {
+			ttl = 1 * time.Hour
+		}
+		fallthrough
+	case HighVolatility:
+		if ttl == 0 {
+			ttl = 5 * time.Minute
+		}
+		var storedTemplates *template.Template
+		lock := sync.Mutex{}
+		loadTemplates = func() (*template.Template, error) {
+			var err error
+			// lock to ensure we don't have multiple requests attempting to reload the
+			// templates at the same time
+			lock.Lock()
+			defer lock.Unlock()
+			if storedTemplates == nil {
+				storedTemplates, err = l.load(templates...)
+				if err != nil {
+					return nil, err
+				}
+				time.AfterFunc(ttl, func() {
+					lock.Lock()
+					defer lock.Unlock()
+					storedTemplates = nil
+				})
+			}
+			return storedTemplates.Clone()
+		}
+		respond = respond.Cache(ttl)
+	case ExtremeVolatility:
+		fallthrough // make this the default value
+	default:
+		loadTemplates = func() (*template.Template, error) {
+			return l.load(templates...)
+		}
+	}
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		t, err := permanentTemplates.Clone()
+		t, err := loadTemplates()
 		if err != nil {
 			eh(res, req, err)
 			return
@@ -93,6 +165,11 @@ func (l *Layout) Act(respond Action, eh ErrorHandler, templates ...string) http.
 		if err = t.ExecuteTemplate(b, l.baseTemplate, data); err != nil {
 			eh(res, req, err)
 			return
+		}
+		// Add Client-Side caching
+		if volatility < ExtremeVolatility {
+			res.Header().Set("Cache-Control", "public, max-age="+strconv.FormatFloat(ttl.Seconds(), 'f', 0, 64))
+			res.Header().Set("Expires", time.Now().Add(ttl).Format(time.RFC1123))
 		}
 		if _, err = b.WriteTo(res); err != nil {
 			eh(res, req, err)

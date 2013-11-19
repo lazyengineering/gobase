@@ -62,7 +62,7 @@ func init() {
 	Layout = layouts.New(layouts.BasicFunctionMap(), "bootstrap.html", *LayoutTemplateGlob, *HelperTemplateGlob)
 
 	// Actual Web Application Handlers
-	HandleNoSubPaths("/", Layout.Act(hello, Error500, "static/templates/hello/*.html"))
+	HandleNoSubPaths("/", Layout.Act(hello, Error500, layouts.NoVolatility, "static/templates/hello/*.html"))
 }
 
 // Log and Handle http requests
