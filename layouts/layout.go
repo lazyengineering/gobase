@@ -149,6 +149,8 @@ func (l *Layout) Act(respond Action, eh ErrorHandler, volatility int, templates 
 			return l.load(templates...)
 		}
 	}
+	// ensure that template loading will work
+	template.Must(loadTemplates())
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		t, err := loadTemplates()
 		if err != nil {
