@@ -83,7 +83,12 @@ func Handle(path string, h http.Handler) {
 	http.HandleFunc(path, func(r http.ResponseWriter, q *http.Request) {
 		t := time.Now()
 		h.ServeHTTP(r, q)
-		log.Printf("\x1b[1;36mServed:\x1b[0m \x1b[34m%6d\x1b[0mµs \x1b[33m%s\x1b[0m", time.Since(t).Nanoseconds()/1000, q.URL.String())
+		s := time.Since(t).Nanoseconds() / 1000 // time in µs
+		message := "\x1b[1;36mServed: \x1b[0m"
+		if s > 10000 { // > 10ms is a "long" request, mark in red with a *
+			message = "\x1b[1;31mServed*:\x1b[0m"
+		}
+		log.Printf("%s \x1b[34m%8d\x1b[0mµs \x1b[33m%s\x1b[0m", message, s, q.URL.String())
 	})
 }
 
