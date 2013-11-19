@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"github.com/russross/blackfriday"
 	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 	"sync"
@@ -178,6 +179,7 @@ func (l *Layout) Act(respond Action, eh ErrorHandler, volatility int, templates 
 }
 
 func (l *Layout) load(patterns ...string) (*template.Template, error) {
+	t := time.Now()
 	var err error
 	// add some key helper functions to the templates
 	b := template.New("base").Funcs(l.functions)
@@ -187,6 +189,7 @@ func (l *Layout) load(patterns ...string) (*template.Template, error) {
 			return nil, err
 		}
 	}
+	log.Printf("\x1b[1;35mTemplates:\x1b[0m \x1b[34m%5d\x1b[0mµs \x1b[33m%v\x1b[0m", time.Since(t).Nanoseconds()/1000, append(l.patterns, patterns...))
 	return b, nil
 }
 
