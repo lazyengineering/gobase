@@ -32,18 +32,25 @@ type Layout struct {
 
 // Create a new Layout from the provided function map, base template name, and set of
 // Globs where template files can be located.
-func New(functions template.FuncMap, baseTemplate string, patterns ...string) *Layout {
+func New(functions template.FuncMap, baseTemplate string, patterns ...string) (*Layout, error) {
 	l := new(Layout)
-	l.Init(functions, baseTemplate, patterns...)
-	return l
+	err := l.Init(functions, baseTemplate, patterns...)
+	if err != nil {
+		return nil, err
+	}
+	return l, nil
 }
 
 // Initialize a layout with the provided function map, base template name, and set of
 // Globs where template files can be located.
-func (l *Layout) Init(functions template.FuncMap, baseTemplate string, patterns ...string) {
+func (l *Layout) Init(functions template.FuncMap, baseTemplate string, patterns ...string) error {
+	if len(baseTemplate) == 0 {
+		return errNoBaseTemplate
+	}
 	l.functions = functions
 	l.baseTemplate = baseTemplate
 	l.patterns = patterns
+	return nil
 }
 
 // An Action does the unique work for an http response where the result should be
