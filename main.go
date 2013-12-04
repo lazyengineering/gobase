@@ -70,7 +70,12 @@ func init() {
 	Handle("/favicon.ico", staticServer)
 
 	// Layouts
-	Layout = layouts.New(layouts.BasicFunctionMap(), "bootstrap.html", *LayoutTemplateGlob, *HelperTemplateGlob)
+	var err error
+	Layout, err = layouts.New(layouts.BasicFunctionMap(), "bootstrap.html", *LayoutTemplateGlob, *HelperTemplateGlob)
+	if err != nil {
+		// this is a fatal condition
+		panic(err)
+	}
 
 	// Actual Web Application Handlers
 	HandleNoSubPaths("/", Layout.Act(hello, Error500, layouts.NoVolatility, "static/templates/hello/*.html"))
