@@ -3,14 +3,14 @@
 
 package layouts
 
+// simple error to eliminate the need for the errors package
 type layoutError string
 
 func (e layoutError) Error() string {
-  return string(e)
+	return string(e)
 }
 
-// Error Messages
+// Error Messages used in this package
 const (
-	errNoBaseTemplate layoutError = "baseTemplate required but not provided"
+	errNoBaseTemplate layoutError = "layouts: baseTemplate required but not provided"
 )
-
