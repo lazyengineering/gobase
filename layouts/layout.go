@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -213,6 +214,13 @@ func BasicFunctionMap() template.FuncMap {
 		},
 		"markdownBasic": func(raw string) template.HTML {
 			return template.HTML(blackfriday.MarkdownBasic([]byte(raw)))
+		},
+		"displayEmail": func(email string, link bool) template.HTML {
+			if link {
+				return template.HTML("<a href=\"mailto:" + email + "\">" + email + "</a>")
+			} else {
+				return template.HTML(strings.Replace(email, "@", "[at]", -1))
+			}
 		},
 	}
 }
