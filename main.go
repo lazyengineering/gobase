@@ -7,10 +7,10 @@ import (
 	"flag"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
+	"github.com/lazyengineering/gobase/envflag"
 	"github.com/lazyengineering/gobase/layouts"
 )
 
@@ -34,21 +34,15 @@ func init() {
 		HelperTemplateGlob = flag.String("helpers", "static/templates/helpers/*.html", "Pattern for helper templates")
 	)
 
-	// set from environment where available before parsing (allows flags to overrule env)
-	flag.VisitAll(func(f *flag.Flag) {
-		switch f.Name {
-		case "server-addr": // special case because it doesn't map directly
-			if port := os.Getenv("PORT"); len(port) > 0 {
-				f.Value.Set(":" + port)
-			}
-		default:
-			if v := os.Getenv(strings.ToUpper(strings.Replace(f.Name, "-", "_", -1))); len(v) > 0 {
-				f.Value.Set(v)
-			}
-		}
+	// To Parse flags, looking for command-line, then ENV, then defaults
+	envflag.Parse(envflag.FlagMap{
+		"server-addr": envflag.Flag{
+			Name: "PORT",
+			Filter: func(s string) string {
+				return ":" + s
+			},
+		},
 	})
-
-	flag.Parse()
 
 	if *NoTimestamp {
 		log.SetFlags(0)
