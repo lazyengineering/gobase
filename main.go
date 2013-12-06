@@ -27,6 +27,8 @@ func init() {
 	defer func() {
 		log.Printf("\x1b[1;32mBootstrapped:\x1b[0m \x1b[34m%8d\x1b[0mµs", time.Since(t).Nanoseconds()/1000)
 	}()
+
+	// Flags only useful in init
 	var (
 		NoTimestamp        = flag.Bool("no-timestamp", false, "When set to true, removes timestamp from log statements")
 		StaticDir          = flag.String("static-dir", "static", "Static Assets folder")
@@ -37,10 +39,8 @@ func init() {
 	// To Parse flags, looking for command-line, then ENV, then defaults
 	envflag.Parse(envflag.FlagMap{
 		"server-addr": envflag.Flag{
-			Name: "PORT",
-			Filter: func(s string) string {
-				return ":" + s
-			},
+			Name:   "PORT",
+			Filter: func(s string) string { return ":" + s },
 		},
 	})
 
