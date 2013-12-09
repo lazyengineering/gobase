@@ -19,3 +19,14 @@ func TestNew(t *testing.T) {
 		t.Error("Layout should be non-nil when no error")
 	}
 }
+
+// Even though this covers exactly what TestNew covered, it's still part of the contract
+func TestInit(t *testing.T) {
+	l := new(Layout)
+	if err := l.Init(nil, ""); err != errNoBaseTemplate {
+		t.Error(errNoBaseTemplate)
+	}
+	if err := l.Init(nil, "base"); err != nil {
+		t.Error("Init Layout with nil function map, defined baseTemplate, and no patterns")
+	}
+}
