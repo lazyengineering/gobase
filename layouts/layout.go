@@ -5,12 +5,10 @@ package layouts
 
 import (
 	"bytes"
-	"github.com/russross/blackfriday"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -201,26 +199,4 @@ func (l *Layout) load(patterns ...string) (*template.Template, error) {
 	}
 	log.Printf("\x1b[1;35mTemplates:\x1b[0m \x1b[34m%6d\x1b[0mµs \x1b[33m%v\x1b[0m", time.Since(t).Nanoseconds()/1000, append(l.patterns, patterns...))
 	return b, nil
-}
-
-// BasicFunctionMap returns a simple template.FuncMap containing the following helper functions
-//
-//     markdownCommon(raw string) template.HTML // process markdown formatted string using github.com/russross/blackfriday MarkdownCommon
-//     markdownBasic(raw string)  template.HTML // process markdown formatted string using github.com/russross/blackfriday MarkdownBasic
-func BasicFunctionMap() template.FuncMap {
-	return template.FuncMap{
-		"markdownCommon": func(raw string) template.HTML {
-			return template.HTML(blackfriday.MarkdownCommon([]byte(raw)))
-		},
-		"markdownBasic": func(raw string) template.HTML {
-			return template.HTML(blackfriday.MarkdownBasic([]byte(raw)))
-		},
-		"displayEmail": func(email string, link bool) template.HTML {
-			if link {
-				return template.HTML("<a href=\"mailto:" + email + "\">" + email + "</a>")
-			} else {
-				return template.HTML(strings.Replace(email, "@", "[at]", -1))
-			}
-		},
-	}
 }

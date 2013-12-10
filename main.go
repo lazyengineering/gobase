@@ -12,6 +12,7 @@ import (
 
 	"github.com/lazyengineering/gobase/envflag"
 	"github.com/lazyengineering/gobase/layouts"
+	"github.com/lazyengineering/gobase/layouts/filters"
 )
 
 // Important metadata
@@ -65,7 +66,7 @@ func init() {
 
 	// Layouts
 	var err error
-	Layout, err = layouts.New(layouts.BasicFunctionMap(), "bootstrap.html", *LayoutTemplateGlob, *HelperTemplateGlob)
+	Layout, err = layouts.New(filters.All, "bootstrap.html", *LayoutTemplateGlob, *HelperTemplateGlob)
 	if err != nil {
 		// this is a fatal condition
 		panic(err)
