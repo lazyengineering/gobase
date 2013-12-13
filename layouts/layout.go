@@ -57,40 +57,6 @@ func (l *Layout) Init(functions template.FuncMap, baseTemplate string, patterns 
 	return nil
 }
 
-// An Action does the unique work for an http response where the result should be
-// a page rendered from a template executed with unique data.
-type Action func(*http.Request) (map[string]interface{}, error)
-
-// Returns an Action that runs the original Action when there is no cached value.
-// The cached value is unset after the given ttl (time to live) duration.
-// A negative ttl will permanently cache
-func (a Action) Cache(ttl time.Duration) Action {
-	var data map[string]interface{}
-	lock := sync.RWMutex{}
-	return func(r *http.Request) (map[string]interface{}, error) {
-		lock.RLock()
-		if data != nil {
-			lock.RUnlock()
-			return data, nil
-		}
-		lock.RUnlock()
-
-		lock.Lock()
-		defer lock.Unlock()
-		var err error
-		data, err = a(r)
-		if data != nil {
-			if ttl > 0 {
-				time.AfterFunc(ttl, func() {
-					lock.Lock()
-					data = nil
-					lock.Unlock()
-				})
-			}
-		}
-		return data, err
-	}
-}
 // Use Act in order to create an http.Handler that fills a template with the data from an executed Action
 // or executes the ErrorHandler in case of an error.
 func (l *Layout) Act(respond Action, eh ErrorHandler, volatility Volatility, templates ...string) http.Handler {
