@@ -82,7 +82,7 @@ func (l *Layout) Act(respond Action, eh ErrorHandler, volatility Volatility, tem
 			}
 			return storedTemplates.Clone()
 		}
-		respond = respond.Cache(-1) // cache permanently
+		respond = respond.cache(-1) // cache permanently
 		ttl = 7 * 24 * time.Hour
 	case LowVolatility:
 		ttl = 24 * time.Hour
@@ -117,7 +117,7 @@ func (l *Layout) Act(respond Action, eh ErrorHandler, volatility Volatility, tem
 			}
 			return storedTemplates.Clone()
 		}
-		respond = respond.Cache(ttl)
+		respond = respond.cache(ttl)
 	case ExtremeVolatility:
 		fallthrough // make this the default value
 	default:

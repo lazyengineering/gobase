@@ -16,7 +16,7 @@ type Action func(*http.Request) (map[string]interface{}, error)
 // Returns an Action that runs the original Action when there is no cached value.
 // The cached value is unset after the given ttl (time to live) duration.
 // A negative ttl will permanently cache
-func (a Action) Cache(ttl time.Duration) Action {
+func (a Action) cache(ttl time.Duration) Action {
 	var data map[string]interface{}
 	lock := sync.RWMutex{}
 	return func(r *http.Request) (map[string]interface{}, error) {
