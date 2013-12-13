@@ -91,6 +91,7 @@ func TestAct(t *testing.T) {
 		RDelay1 testResponse
 		RDelay2 testResponse
 	}
+  // TODO: find minumum coverage set here. We have too many cases, and they are difficult to manage or reason about
 	testCases := []testCase{
 		{
 			A: NilNilAction(),
