@@ -44,7 +44,7 @@ func TestServePermanentRedirects(t *testing.T) {
 	if _, err := c.Get(s.URL + "/google"); err != nil {
 		e := err.(*url.Error)
 		t.Log("Expected: http://www.google.com\tActual: ", e.URL)
-		if e.URL != "http://www.google.com" { // assumes the "" to "/" automatically
+		if e.URL != "http://www.google.com" {
 			t.Fail()
 		}
 	} else {
