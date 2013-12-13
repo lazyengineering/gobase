@@ -31,6 +31,9 @@ type Layout struct {
 	baseTemplate string
 }
 
+// The signature for a function that will be used when an error occurs with an Action
+type ErrorHandler func(http.ResponseWriter, *http.Request, error)
+
 // Create a new Layout from the provided function map, base template name, and set of
 // Globs where template files can be located.
 func New(functions template.FuncMap, baseTemplate string, patterns ...string) (*Layout, error) {
@@ -88,15 +91,14 @@ func (a Action) Cache(ttl time.Duration) Action {
 		return data, err
 	}
 }
-
-// The signature for a function that will be used when an error occurs with an Action
-type ErrorHandler func(http.ResponseWriter, *http.Request, error)
-
 // Use Act in order to create an http.Handler that fills a template with the data from an executed Action
 // or executes the ErrorHandler in case of an error.
 func (l *Layout) Act(respond Action, eh ErrorHandler, volatility Volatility, templates ...string) http.Handler {
 	var loadTemplates func() (*template.Template, error)
 	var ttl time.Duration
+	if eh == nil {
+		eh = func(w http.ResponseWriter, r *http.Request, e error) {}
+	}
 	switch volatility {
 	case NoVolatility:
 		// Load templates so that we can clone instead of loading every time
