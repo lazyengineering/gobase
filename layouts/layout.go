@@ -13,12 +13,14 @@ import (
 	"time"
 )
 
+type Volatility uint
+
 const (
-	NoVolatility      = iota // A request is not expected to have a different result for the lifetime of the application
-	LowVolatility            // A request should have a different result within one day of changes to source data
-	MediumVolatility         // A request should have a different result within an hour of changes to source data
-	HighVolatility           // A request should have a different result with five minutes of changes to source data
-	ExtremeVolatility        // A request should immediately reflect changes to source data
+	NoVolatility      Volatility = iota // A request is not expected to have a different result for the lifetime of the application
+	LowVolatility                       // A request should have a different result within one day of changes to source data
+	MediumVolatility                    // A request should have a different result within an hour of changes to source data
+	HighVolatility                      // A request should have a different result with five minutes of changes to source data
+	ExtremeVolatility                   // A request should immediately reflect changes to source data
 )
 
 // Layout defines a collection of templates we can use throughout a site,
@@ -92,7 +94,7 @@ type ErrorHandler func(http.ResponseWriter, *http.Request, error)
 
 // Use Act in order to create an http.Handler that fills a template with the data from an executed Action
 // or executes the ErrorHandler in case of an error.
-func (l *Layout) Act(respond Action, eh ErrorHandler, volatility int, templates ...string) http.Handler {
+func (l *Layout) Act(respond Action, eh ErrorHandler, volatility Volatility, templates ...string) http.Handler {
 	var loadTemplates func() (*template.Template, error)
 	var ttl time.Duration
 	switch volatility {
