@@ -3,4 +3,3 @@ script: go test ./...
 go:
   - 1.1
   - 1.2
-  - tip
