@@ -71,6 +71,8 @@ func DefaultError(t *testing.T) ErrorHandler {
 	})
 }
 
+// TODO: Find a way to test Layout.load() error handling; it's one of the only uncovered bits
+
 func TestAct(t *testing.T) {
 	l, err := New(nil, "base", ".test/helper")
 	if err != nil {
@@ -91,252 +93,24 @@ func TestAct(t *testing.T) {
 		RDelay1 testResponse
 		RDelay2 testResponse
 	}
-  // TODO: find minumum coverage set here. We have too many cases, and they are difficult to manage or reason about
+
+	// Instead of an exhausive set of cases, we expand the following:
+	//
+	// A        E   V       T    R1S R1B R2S R2B RD1S RD1B RD2S RD2B
+	// -------- --- ------- ---- --- --- --- --- ---- ---- ---- ----
+	// nilnil   X   X       base 200 ""  200 ""  200  ""   200  ""
+	// X        nil X       nil  200 ""  200 ""  200  ""   200  ""
+	// nilErr   nil X       X    200 ""  200 ""  200  ""   200  ""
+	// X        def X       nil  500 "1" 500 "2" 500  "3"  500  "4"
+	// nilErr   def X       X    500 "1" 500 "2" 500  "3"  500  "4"
+	// count    X   no      base 200 "1" 200 "1" 200  "1"  200  "1"
+	// count    X   low     base 200 "1" 200 "1" 200  "1"  200  "1"
+	// count    X   med     base 200 "1" 200 "1" 200  "1"  200  "1"
+	// count    X   high    base 200 "1" 200 "1" 200  "2"  200  "2"
+	// count    X   extreme base 200 "1" 200 "2" 200  "3"  200  "4"
 	testCases := []testCase{
-		{
-			A: NilNilAction(),
-			E: nil,
-			V: NoVolatility,
-			T: nil,
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: NilNilAction(),
-			E: nil,
-			V: NoVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: NilNilAction(),
-			E: nil,
-			V: LowVolatility,
-			T: nil,
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: NilNilAction(),
-			E: nil,
-			V: LowVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: NilNilAction(),
-			E: nil,
-			V: MediumVolatility,
-			T: nil,
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: NilNilAction(),
-			E: nil,
-			V: MediumVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: NilNilAction(),
-			E: nil,
-			V: HighVolatility,
-			T: nil,
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: NilNilAction(),
-			E: nil,
-			V: HighVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: NilNilAction(),
-			E: nil,
-			V: ExtremeVolatility,
-			T: nil,
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: NilNilAction(),
-			E: nil,
-			V: ExtremeVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-
-		{
-			A: NilNilAction(),
-			E: DefaultError(t),
-			V: NoVolatility,
-			T: nil, // should cause error
-			R1: testResponse{
-				Status: 500,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 500,
-				Body:   "2",
-			},
-			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
-			},
-			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
-			},
-		},
-		{
+		// nilnil X X base = 200 ""
+		{ // nilnil def no base
 			A: NilNilAction(),
 			E: DefaultError(t),
 			V: NoVolatility,
@@ -358,31 +132,9 @@ func TestAct(t *testing.T) {
 				Body:   "",
 			},
 		},
-		{
+		{ // nilnil nil low base
 			A: NilNilAction(),
-			E: DefaultError(t),
-			V: LowVolatility,
-			T: nil, // should cause error
-			R1: testResponse{
-				Status: 500,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 500,
-				Body:   "2",
-			},
-			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
-			},
-			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
-			},
-		},
-		{
-			A: NilNilAction(),
-			E: DefaultError(t),
+			E: nil,
 			V: LowVolatility,
 			T: []string{".test/base"},
 			R1: testResponse{
@@ -402,29 +154,7 @@ func TestAct(t *testing.T) {
 				Body:   "",
 			},
 		},
-		{
-			A: NilNilAction(),
-			E: DefaultError(t),
-			V: MediumVolatility,
-			T: nil, // error condition
-			R1: testResponse{
-				Status: 500,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 500,
-				Body:   "2",
-			},
-			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
-			},
-			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
-			},
-		},
-		{
+		{ // nilnil def med base
 			A: NilNilAction(),
 			E: DefaultError(t),
 			V: MediumVolatility,
@@ -446,31 +176,9 @@ func TestAct(t *testing.T) {
 				Body:   "",
 			},
 		},
-		{
+		{ // nilnil nil high base
 			A: NilNilAction(),
-			E: DefaultError(t),
-			V: HighVolatility,
-			T: nil, // error
-			R1: testResponse{
-				Status: 500,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 500,
-				Body:   "2",
-			},
-			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
-			},
-			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
-			},
-		},
-		{
-			A: NilNilAction(),
-			E: DefaultError(t),
+			E: nil,
 			V: HighVolatility,
 			T: []string{".test/base"},
 			R1: testResponse{
@@ -490,29 +198,7 @@ func TestAct(t *testing.T) {
 				Body:   "",
 			},
 		},
-		{
-			A: NilNilAction(),
-			E: DefaultError(t),
-			V: ExtremeVolatility,
-			T: nil, // error
-			R1: testResponse{
-				Status: 500,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 500,
-				Body:   "2",
-			},
-			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
-			},
-			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
-			},
-		},
-		{
+		{ // nilnil def extreme base
 			A: NilNilAction(),
 			E: DefaultError(t),
 			V: ExtremeVolatility,
@@ -535,8 +221,9 @@ func TestAct(t *testing.T) {
 			},
 		},
 
-		{
-			A: CountNilAction(t),
+		// X nil X nil = 200 ""
+		{ // nilnil nil no nil
+			A: NilNilAction(),
 			E: nil,
 			V: NoVolatility,
 			T: nil,
@@ -557,29 +244,7 @@ func TestAct(t *testing.T) {
 				Body:   "",
 			},
 		},
-		{
-			A: CountNilAction(t),
-			E: nil,
-			V: NoVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-		},
-		{
+		{ // count nil low nil
 			A: CountNilAction(t),
 			E: nil,
 			V: LowVolatility,
@@ -601,471 +266,7 @@ func TestAct(t *testing.T) {
 				Body:   "",
 			},
 		},
-		{
-			A: CountNilAction(t),
-			E: nil,
-			V: LowVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: nil,
-			V: MediumVolatility,
-			T: nil,
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: nil,
-			V: MediumVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: nil,
-			V: HighVolatility,
-			T: nil,
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: nil,
-			V: HighVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "2",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "2",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: nil,
-			V: ExtremeVolatility,
-			T: nil,
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: nil,
-			V: ExtremeVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "2",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "3",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "4",
-			},
-		},
-
-		{
-			A: CountNilAction(t),
-			E: DefaultError(t),
-			V: NoVolatility,
-			T: nil, // error
-			R1: testResponse{
-				Status: 500,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 500,
-				Body:   "2",
-			},
-			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
-			},
-			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: DefaultError(t),
-			V: NoVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: DefaultError(t),
-			V: LowVolatility,
-			T: nil, // error
-			R1: testResponse{
-				Status: 500,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 500,
-				Body:   "2",
-			},
-			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
-			},
-			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: DefaultError(t),
-			V: LowVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: DefaultError(t),
-			V: MediumVolatility,
-			T: nil, // error
-			R1: testResponse{
-				Status: 500,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 500,
-				Body:   "2",
-			},
-			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
-			},
-			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: DefaultError(t),
-			V: MediumVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: DefaultError(t),
-			V: HighVolatility,
-			T: nil, // error
-			R1: testResponse{
-				Status: 500,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 500,
-				Body:   "2",
-			},
-			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
-			},
-			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: DefaultError(t),
-			V: HighVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "2",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "2",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: DefaultError(t),
-			V: ExtremeVolatility,
-			T: nil, // error
-			R1: testResponse{
-				Status: 500,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 500,
-				Body:   "2",
-			},
-			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
-			},
-			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
-			},
-		},
-		{
-			A: CountNilAction(t),
-			E: DefaultError(t),
-			V: ExtremeVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "1",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "2",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "3",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "4",
-			},
-		},
-
-		{
-			A: ErrorAction(),
-			E: nil, // error
-			V: NoVolatility,
-			T: nil,
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: ErrorAction(),
-			E: nil,
-			V: NoVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: ErrorAction(),
-			E: nil,
-			V: LowVolatility,
-			T: nil,
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: ErrorAction(),
-			E: nil,
-			V: LowVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
+		{ // nilErr nil med nil
 			A: ErrorAction(),
 			E: nil, // error
 			V: MediumVolatility,
@@ -1087,33 +288,11 @@ func TestAct(t *testing.T) {
 				Body:   "",
 			},
 		},
-		{
-			A: ErrorAction(),
-			E: nil,
-			V: MediumVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: ErrorAction(),
+		{ // nilnil nil high nil
+			A: NilNilAction(),
 			E: nil,
 			V: HighVolatility,
-			T: nil, // error
+			T: nil,
 			R1: testResponse{
 				Status: 200,
 				Body:   "",
@@ -1131,55 +310,11 @@ func TestAct(t *testing.T) {
 				Body:   "",
 			},
 		},
-		{
-			A: ErrorAction(),
-			E: nil,
-			V: HighVolatility,
-			T: []string{".test/base"},
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: ErrorAction(),
+		{ // count nil extreme nil
+			A: CountNilAction(t),
 			E: nil,
 			V: ExtremeVolatility,
-			T: nil, // error
-			R1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			R2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay1: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-			RDelay2: testResponse{
-				Status: 200,
-				Body:   "",
-			},
-		},
-		{
-			A: ErrorAction(),
-			E: nil,
-			V: ExtremeVolatility,
-			T: []string{".test/base"},
+			T: nil,
 			R1: testResponse{
 				Status: 200,
 				Body:   "",
@@ -1198,12 +333,125 @@ func TestAct(t *testing.T) {
 			},
 		},
 
-		{
+		// nilErr nil X X = 200 ""
+		{ // nilErr nil no nil
 			A: ErrorAction(),
-			E: DefaultError(t),
+			E: nil,
 			V: NoVolatility,
+			T: nil,
+			R1: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			R2: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			RDelay1: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			RDelay2: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+		},
+		{ // nilErr nil low base
+			A: ErrorAction(),
+			E: nil,
+			V: LowVolatility,
+			T: []string{".test/base"},
+			R1: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			R2: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			RDelay1: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			RDelay2: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+		},
+		{ // nilErr nil med nil
+			A: ErrorAction(),
+			E: nil,
+			V: MediumVolatility,
+			T: nil,
+			R1: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			R2: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			RDelay1: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			RDelay2: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+		},
+		{ // nilErr nil high base
+			A: ErrorAction(),
+			E: nil,
+			V: HighVolatility,
+			T: []string{".test/base"},
+			R1: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			R2: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			RDelay1: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			RDelay2: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+		},
+		{ // nilErr nil extreme nil
+			A: ErrorAction(),
+			E: nil,
+			V: ExtremeVolatility,
 			T: nil, // error
 			R1: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			R2: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			RDelay1: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+			RDelay2: testResponse{
+				Status: 200,
+				Body:   "",
+			},
+		},
+
+		// X def X nil = 500 "[1,2,3,4]"
+		{ // nilnil def extreme nil
+			A: NilNilAction(),
+			E: DefaultError(t),
+			V: ExtremeVolatility,
+			T: nil,
+			R1: testResponse{
 				Status: 500,
 				Body:   "1",
 			},
@@ -1220,7 +468,97 @@ func TestAct(t *testing.T) {
 				Body:   "4",
 			},
 		},
-		{
+		{ // count def high nil
+			A: CountNilAction(t),
+			E: DefaultError(t),
+			V: HighVolatility,
+			T: nil,
+			R1: testResponse{
+				Status: 500,
+				Body:   "1",
+			},
+			R2: testResponse{
+				Status: 500,
+				Body:   "2",
+			},
+			RDelay1: testResponse{
+				Status: 500,
+				Body:   "3",
+			},
+			RDelay2: testResponse{
+				Status: 500,
+				Body:   "4",
+			},
+		},
+		{ // nilErr def med nil
+			A: ErrorAction(),
+			E: DefaultError(t),
+			V: MediumVolatility,
+			T: nil,
+			R1: testResponse{
+				Status: 500,
+				Body:   "1",
+			},
+			R2: testResponse{
+				Status: 500,
+				Body:   "2",
+			},
+			RDelay1: testResponse{
+				Status: 500,
+				Body:   "3",
+			},
+			RDelay2: testResponse{
+				Status: 500,
+				Body:   "4",
+			},
+		},
+		{ // nilnil def low nil
+			A: NilNilAction(),
+			E: DefaultError(t),
+			V: LowVolatility,
+			T: nil,
+			R1: testResponse{
+				Status: 500,
+				Body:   "1",
+			},
+			R2: testResponse{
+				Status: 500,
+				Body:   "2",
+			},
+			RDelay1: testResponse{
+				Status: 500,
+				Body:   "3",
+			},
+			RDelay2: testResponse{
+				Status: 500,
+				Body:   "4",
+			},
+		},
+		{ // count def no nil
+			A: CountNilAction(t),
+			E: DefaultError(t),
+			V: NoVolatility,
+			T: nil,
+			R1: testResponse{
+				Status: 500,
+				Body:   "1",
+			},
+			R2: testResponse{
+				Status: 500,
+				Body:   "2",
+			},
+			RDelay1: testResponse{
+				Status: 500,
+				Body:   "3",
+			},
+			RDelay2: testResponse{
+				Status: 500,
+				Body:   "4",
+			},
+		},
+
+		// nilErr def X X = 500 "[1,2,3,4]"
+		{ // nilErr def no base
 			A: ErrorAction(),
 			E: DefaultError(t),
 			V: NoVolatility,
@@ -1242,7 +580,7 @@ func TestAct(t *testing.T) {
 				Body:   "4",
 			},
 		},
-		{
+		{ // nilErr def low nil
 			A: ErrorAction(),
 			E: DefaultError(t),
 			V: LowVolatility,
@@ -1264,157 +602,299 @@ func TestAct(t *testing.T) {
 				Body:   "4",
 			},
 		},
-		{
+		{ // nilErr def med base
 			A: ErrorAction(),
+			E: DefaultError(t),
+			V: MediumVolatility,
+			T: []string{".test/base"},
+			R1: testResponse{
+				Status: 500,
+				Body:   "1",
+			},
+			R2: testResponse{
+				Status: 500,
+				Body:   "2",
+			},
+			RDelay1: testResponse{
+				Status: 500,
+				Body:   "3",
+			},
+			RDelay2: testResponse{
+				Status: 500,
+				Body:   "4",
+			},
+		},
+		{ // nilErr def high nil
+			A: ErrorAction(),
+			E: DefaultError(t),
+			V: HighVolatility,
+			T: nil,
+			R1: testResponse{
+				Status: 500,
+				Body:   "1",
+			},
+			R2: testResponse{
+				Status: 500,
+				Body:   "2",
+			},
+			RDelay1: testResponse{
+				Status: 500,
+				Body:   "3",
+			},
+			RDelay2: testResponse{
+				Status: 500,
+				Body:   "4",
+			},
+		},
+		{ // nilErr def extreme base
+			A: ErrorAction(),
+			E: DefaultError(t),
+			V: ExtremeVolatility,
+			T: []string{".test/base"},
+			R1: testResponse{
+				Status: 500,
+				Body:   "1",
+			},
+			R2: testResponse{
+				Status: 500,
+				Body:   "2",
+			},
+			RDelay1: testResponse{
+				Status: 500,
+				Body:   "3",
+			},
+			RDelay2: testResponse{
+				Status: 500,
+				Body:   "4",
+			},
+		},
+
+		// count X no base = 200 "1"
+		{ // count nil no base
+			A: CountNilAction(t),
+			E: nil,
+			V: NoVolatility,
+			T: []string{".test/base"},
+			R1: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+			R2: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+			RDelay1: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+			RDelay2: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+		},
+		{ // count def no base
+			A: CountNilAction(t),
+			E: DefaultError(t),
+			V: NoVolatility,
+			T: []string{".test/base"},
+			R1: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+			R2: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+			RDelay1: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+			RDelay2: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+		},
+
+		// count X low base = 200 "1"
+		{ // count nil low base
+			A: CountNilAction(t),
+			E: nil,
+			V: LowVolatility,
+			T: []string{".test/base"},
+			R1: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+			R2: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+			RDelay1: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+			RDelay2: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+		},
+		{ // count def low base
+			A: CountNilAction(t),
 			E: DefaultError(t),
 			V: LowVolatility,
 			T: []string{".test/base"},
 			R1: testResponse{
-				Status: 500,
+				Status: 200,
 				Body:   "1",
 			},
 			R2: testResponse{
-				Status: 500,
-				Body:   "2",
-			},
-			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
-			},
-			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
-			},
-		},
-		{
-			A: ErrorAction(),
-			E: DefaultError(t),
-			V: MediumVolatility,
-			T: nil,
-			R1: testResponse{
-				Status: 500,
+				Status: 200,
 				Body:   "1",
 			},
-			R2: testResponse{
-				Status: 500,
-				Body:   "2",
-			},
 			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
+				Status: 200,
+				Body:   "1",
 			},
 			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
+				Status: 200,
+				Body:   "1",
 			},
 		},
-		{
-			A: ErrorAction(),
-			E: DefaultError(t),
+
+		// count X med base = 200 "1"
+		{ // count nil med base
+			A: CountNilAction(t),
+			E: nil,
 			V: MediumVolatility,
 			T: []string{".test/base"},
 			R1: testResponse{
-				Status: 500,
+				Status: 200,
 				Body:   "1",
 			},
 			R2: testResponse{
-				Status: 500,
-				Body:   "2",
+				Status: 200,
+				Body:   "1",
 			},
 			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
+				Status: 200,
+				Body:   "1",
 			},
 			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
+				Status: 200,
+				Body:   "1",
 			},
 		},
-		{
-			A: ErrorAction(),
+		{ // count def med base
+			A: CountNilAction(t),
 			E: DefaultError(t),
-			V: HighVolatility,
-			T: nil,
+			V: MediumVolatility,
+			T: []string{".test/base"},
 			R1: testResponse{
-				Status: 500,
+				Status: 200,
 				Body:   "1",
 			},
 			R2: testResponse{
-				Status: 500,
-				Body:   "2",
+				Status: 200,
+				Body:   "1",
 			},
 			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
+				Status: 200,
+				Body:   "1",
 			},
 			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
+				Status: 200,
+				Body:   "1",
 			},
 		},
-		{
-			A: ErrorAction(),
+
+		// count X high base = 200 "[1,1,2,2]"
+		{ // count nil high base
+			A: CountNilAction(t),
+			E: nil,
+			V: HighVolatility,
+			T: []string{".test/base"},
+			R1: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+			R2: testResponse{
+				Status: 200,
+				Body:   "1",
+			},
+			RDelay1: testResponse{
+				Status: 200,
+				Body:   "2",
+			},
+			RDelay2: testResponse{
+				Status: 200,
+				Body:   "2",
+			},
+		},
+		{ // count def high base
+			A: CountNilAction(t),
 			E: DefaultError(t),
 			V: HighVolatility,
 			T: []string{".test/base"},
 			R1: testResponse{
-				Status: 500,
+				Status: 200,
 				Body:   "1",
 			},
 			R2: testResponse{
-				Status: 500,
-				Body:   "2",
+				Status: 200,
+				Body:   "1",
 			},
 			RDelay1: testResponse{
-				Status: 500,
-				Body:   "3",
+				Status: 200,
+				Body:   "2",
 			},
 			RDelay2: testResponse{
-				Status: 500,
-				Body:   "4",
+				Status: 200,
+				Body:   "2",
 			},
 		},
-		{
-			A: ErrorAction(),
-			E: DefaultError(t),
+
+		// count X extreme base = 200 "[1,2,3,4]"
+		{ // count nil extreme base
+			A: CountNilAction(t),
+			E: nil,
 			V: ExtremeVolatility,
-			T: nil,
+			T: []string{".test/base"},
 			R1: testResponse{
-				Status: 500,
+				Status: 200,
 				Body:   "1",
 			},
 			R2: testResponse{
-				Status: 500,
+				Status: 200,
 				Body:   "2",
 			},
 			RDelay1: testResponse{
-				Status: 500,
+				Status: 200,
 				Body:   "3",
 			},
 			RDelay2: testResponse{
-				Status: 500,
+				Status: 200,
 				Body:   "4",
 			},
 		},
-		{
-			A: ErrorAction(),
+		{ // count def extreme base
+			A: CountNilAction(t),
 			E: DefaultError(t),
 			V: ExtremeVolatility,
 			T: []string{".test/base"},
 			R1: testResponse{
-				Status: 500,
+				Status: 200,
 				Body:   "1",
 			},
 			R2: testResponse{
-				Status: 500,
+				Status: 200,
 				Body:   "2",
 			},
 			RDelay1: testResponse{
-				Status: 500,
+				Status: 200,
 				Body:   "3",
 			},
 			RDelay2: testResponse{
-				Status: 500,
+				Status: 200,
 				Body:   "4",
 			},
 		},
