@@ -978,3 +978,100 @@ func TestAct(t *testing.T) {
 		}
 	}
 }
+
+func FastAction(idx int) Action {
+	return Action(func(r *http.Request) (map[string]interface{}, error) {
+		return map[string]interface{}{
+			"Count": idx,
+			"Fast":  "Fast",
+			"Words": []string{"Fast"},
+		}, nil
+	})
+}
+
+func SlowAction(idx int) Action {
+	return Action(func(r *http.Request) (map[string]interface{}, error) {
+		<-time.After(time.Second)
+		return map[string]interface{}{
+			"Count": idx,
+			"Slow":  "Slow",
+			"Words": []string{"Slow"},
+		}, nil
+	})
+}
+
+func TestActMerge(t *testing.T) {
+	l, err := New(nil, "base", ".test/helper")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	type testResponse struct {
+		Status int
+		Body   string
+	}
+	type testCase struct {
+		Actions  []Action
+		Response testResponse
+	}
+	// Test cases
+	// Actions                            Status Body
+	// ---------------------------------- ------ ---------------------------
+	// FastAction, SlowAction, FastAction 200    Fast\nSlow\n0\nFastSlowFast
+	// SlowAction, FastAction, SlowAction 200    Slow\nFast\n0\nSlowFastSlow
+	// FastAction, ErrorAction            500    nil
+	// ErrorAction, FastAction            500    nil
+	testCases := []testCase{
+		{
+			Actions: []Action{FastAction(0), SlowAction(1), FastAction(2)},
+			Response: testResponse{
+				Status: 200,
+				Body:   "Fast\nSlow\n0\nFastSlowFast",
+			},
+		},
+		{
+			Actions: []Action{SlowAction(0), FastAction(1), SlowAction(2)},
+			Response: testResponse{
+				Status: 200,
+				Body:   "Slow\nFast\n0\nSlowFastSlow",
+			},
+		},
+		{
+			Actions: []Action{FastAction(0), ErrorAction()},
+			Response: testResponse{
+				Status: 500,
+				Body:   "1",
+			},
+		},
+		{
+			Actions: []Action{ErrorAction(), FastAction(0)},
+			Response: testResponse{
+				Status: 500,
+				Body:   "2",
+			},
+		},
+	}
+
+	for idx, tc := range testCases {
+		service := httptest.NewServer(l.Act(
+			MergeActions(tc.Actions...),
+			DefaultError(t),
+			NoVolatility,
+			".test/actMerge",
+		))
+
+		if r, err := http.Get(service.URL); err != nil {
+			t.Error(err)
+		} else if r.StatusCode != tc.Response.Status {
+			t.Error("test\t", idx, "\t1st call: expected:\tstatus ", tc.Response.Status, "\tactual:\tstatus ", r.StatusCode)
+		} else {
+			body, errr := ioutil.ReadAll(r.Body)
+			if errr != nil {
+				t.Error(errr)
+			}
+			if strings.TrimSpace(string(body)) != tc.Response.Body {
+				t.Error("test\t", idx, "\t1st call: expected:\t", tc.Response.Body, "\tactual:\t", string(body))
+			}
+		}
+	}
+}

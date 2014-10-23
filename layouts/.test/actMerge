@@ -1,0 +1,4 @@
+{{.Fast}}
+{{.Slow}}
+{{.Count}}
+{{range .Words}}{{.}}{{end}}
