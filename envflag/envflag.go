@@ -25,6 +25,7 @@ type Flag struct {
 
 // Parse flags where command > environment > default
 func Parse(m FlagMap) {
+	flag.Parse()
 	flag.VisitAll(func(f *flag.Flag) {
 		mapping := Flag{}
 		if s, ok := m[f.Name]; ok {
