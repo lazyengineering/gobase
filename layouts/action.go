@@ -49,7 +49,7 @@ func (a Action) cache(ttl time.Duration) Action {
 // Duplicate keys in the returned map are resolved with the first action
 // in the arguments taking priority, except where the value is a slice of
 // strings, which will be merged.
-func Merge(actions ...Action) Action {
+func MergeActions(actions ...Action) Action {
 	return func(req *http.Request) (map[string]interface{}, error) {
 		done := make(chan struct{})
 		defer close(done)

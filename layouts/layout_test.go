@@ -1001,7 +1001,7 @@ func SlowAction(idx int) Action {
 }
 
 func TestActMerge(t *testing.T) {
-	l, err := New(nil, "base", ".test/helper")
+	l, err := New(nil, "actMerge", ".test/actMerge")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1018,9 +1018,9 @@ func TestActMerge(t *testing.T) {
 	// Actions                            Status Body
 	// ---------------------------------- ------ ---------------------------
 	// FastAction, SlowAction, FastAction 200    Fast\nSlow\n0\nFastSlowFast
-	// SlowAction, FastAction, SlowAction 200    Slow\nFast\n0\nSlowFastSlow
+	// SlowAction, FastAction, SlowAction 200    Fast\nSlow\n0\nSlowFastSlow
 	// FastAction, ErrorAction            500    nil
-	// ErrorAction, FastAction            500    nil
+	// ErrorAction, SlowAction            500    nil
 	testCases := []testCase{
 		{
 			Actions: []Action{FastAction(0), SlowAction(1), FastAction(2)},
@@ -1033,7 +1033,7 @@ func TestActMerge(t *testing.T) {
 			Actions: []Action{SlowAction(0), FastAction(1), SlowAction(2)},
 			Response: testResponse{
 				Status: 200,
-				Body:   "Slow\nFast\n0\nSlowFastSlow",
+				Body:   "Fast\nSlow\n0\nSlowFastSlow",
 			},
 		},
 		{
@@ -1044,10 +1044,10 @@ func TestActMerge(t *testing.T) {
 			},
 		},
 		{
-			Actions: []Action{ErrorAction(), FastAction(0)},
+			Actions: []Action{ErrorAction(), SlowAction(0)},
 			Response: testResponse{
 				Status: 500,
-				Body:   "2",
+				Body:   "1",
 			},
 		},
 	}
@@ -1057,12 +1057,12 @@ func TestActMerge(t *testing.T) {
 			MergeActions(tc.Actions...),
 			DefaultError(t),
 			NoVolatility,
-			".test/actMerge",
 		))
 
 		if r, err := http.Get(service.URL); err != nil {
 			t.Error(err)
 		} else if r.StatusCode != tc.Response.Status {
+      t.Log(tc,r)
 			t.Error("test\t", idx, "\t1st call: expected:\tstatus ", tc.Response.Status, "\tactual:\tstatus ", r.StatusCode)
 		} else {
 			body, errr := ioutil.ReadAll(r.Body)
