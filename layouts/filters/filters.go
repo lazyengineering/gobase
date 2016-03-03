@@ -1,4 +1,4 @@
-// Copyright 2013 Jesse Allen. All rights reserved
+// Copyright 2013-2016 Jesse Allen. All rights reserved
 // Released under the MIT license found in the LICENSE file.
 
 // Provide some useful functions for use in templates

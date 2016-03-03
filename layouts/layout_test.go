@@ -1,4 +1,4 @@
-// Copyright 2013 Jesse Allen. All rights reserved
+// Copyright 2013-2016 Jesse Allen. All rights reserved
 // Released under the MIT license found in the LICENSE file.
 
 package layouts
@@ -1062,7 +1062,7 @@ func TestActMerge(t *testing.T) {
 		if r, err := http.Get(service.URL); err != nil {
 			t.Error(err)
 		} else if r.StatusCode != tc.Response.Status {
-      t.Log(tc,r)
+			t.Log(tc, r)
 			t.Error("test\t", idx, "\t1st call: expected:\tstatus ", tc.Response.Status, "\tactual:\tstatus ", r.StatusCode)
 		} else {
 			body, errr := ioutil.ReadAll(r.Body)
