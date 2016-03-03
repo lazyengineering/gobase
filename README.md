@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/lazyengineering/gobase.png?label=ready&title=Ready)](https://waffle.io/lazyengineering/gobase)
 gobase
 ======
 
